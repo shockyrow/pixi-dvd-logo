@@ -4,54 +4,35 @@ import Stats from "stats.js";
 import { Walker } from "./Walker";
 import type { Updatable } from "./interfaces";
 import WalkerWorker from "./walker.worker?worker";
+import { Pane } from "tweakpane";
 
+const updatables: Updatable[] = [];
 const stats = new Stats();
 const app = new Application();
 
-async function init() {
-  await app.init({
-    background: "#1099bb",
-    resizeTo: window,
-  });
+let container: ParticleContainer;
+let worker: Worker | null = null;
 
-  document.body.appendChild(app.canvas);
+const params = {
+  walkerCount: 10000,
+  reset: () => resetSimulation(),
+};
 
-  stats.showPanel(0);
-  document.body.appendChild(stats.dom);
-
-  const container = new ParticleContainer({
-    dynamicProperties: {
-      position: true,
-      vertices: false,
-      rotation: false,
-      uvs: false,
-      tint: false,
-      sclae: false,
-    },
-  });
-
-  app.stage.addChild(container);
+function resetSimulation() {
+  // 1. Cleanup existing state
+  if (worker) worker.terminate();
+  container.removeParticles();
+  updatables.length = 0;
 
   const walkerVisual = new Graphics().circle(0, 0, 5).fill(0xffffff);
   const walkerTexture = app.renderer.generateTexture(walkerVisual);
   walkerVisual.destroy();
 
-  const updatables: Updatable[] = [];
-
-  const walkerCount = 10000;
-  const worker = new WalkerWorker();
-
+  // 3. Start Worker
+  worker = new WalkerWorker();
   worker.postMessage({
-    count: walkerCount,
+    count: params.walkerCount,
     bounds: app.screen,
-  });
-
-  app.ticker.add(() => {
-    stats.begin();
-
-    updatables.forEach((updatable) => updatable.update());
-
-    stats.end();
   });
 
   worker.onmessage = (e: MessageEvent) => {
@@ -67,10 +48,54 @@ async function init() {
       });
     }
 
-    if (type === "COMPLETE") {
+    if (type === "COMPLETE" && worker) {
       worker.terminate();
     }
   };
+}
+
+function setupUI() {
+  const controlsPane = new Pane({ title: "Simulation controls" });
+
+  controlsPane.addBinding(params, "walkerCount", {
+    min: 100,
+    max: 100000,
+    step: 100,
+    label: "Count",
+  });
+
+  controlsPane.addButton({ title: "Restart" }).on("click", () => {
+    resetSimulation();
+  });
+}
+
+async function init() {
+  await app.init({
+    background: "#1099bb",
+    resizeTo: window,
+  });
+
+  document.body.appendChild(app.canvas);
+
+  stats.showPanel(0);
+  document.body.appendChild(stats.dom);
+
+  container = new ParticleContainer({
+    dynamicProperties: { position: true },
+  });
+
+  app.stage.addChild(container);
+
+  setupUI();
+  resetSimulation();
+
+  app.ticker.add(() => {
+    stats.begin();
+
+    updatables.forEach((updatable) => updatable.update());
+
+    stats.end();
+  });
 }
 
 init();
