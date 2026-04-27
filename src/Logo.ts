@@ -45,9 +45,9 @@ export class Logo implements Updatable {
     this.view.y = this.y;
   }
 
-  public moveBy(dx: number, dy: number): void {
-    this.x += dx;
-    this.y += dy;
+  public moveTo(x: number, y: number): void {
+    this.x = x;
+    this.y = y;
 
     this.view.x = this.x;
     this.view.y = this.y;

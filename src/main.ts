@@ -14,10 +14,13 @@ visual.tint = "gold";
 visual.eventMode = "dynamic";
 
 let logo: Logo | null = null;
-let lastX = 0;
-let lastY = 0;
+let offsetX = 0;
+let offsetY = 0;
 
-visual.on("pointerdown", () => {
+visual.on("pointerdown", e => {
+  offsetX = e.clientX - visual.x;
+  offsetY = e.clientY - visual.y;
+
   if (logo) logo.startDragging();
 });
 
@@ -30,10 +33,7 @@ visual.on("pointerupoutside", pointerUpHandler);
 
 visual.on("globalpointermove", (e) => {
   if (logo && logo.isDragging())
-    logo.moveBy(e.clientX - lastX, e.clientY - lastY);
-
-  lastX = e.clientX;
-  lastY = e.clientY;
+    logo.moveTo(e.clientX - offsetX, e.clientY - offsetY);
 });
 
 const params = {
