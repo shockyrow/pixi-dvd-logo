@@ -18,26 +18,27 @@ let lastX = 0;
 let lastY = 0;
 
 visual.on("pointerdown", () => {
-  if(logo) logo.startDragging()
+  if (logo) logo.startDragging();
 });
 
 const pointerUpHandler = () => {
-  if(logo) logo.stopDragging()
+  if (logo) logo.stopDragging();
 };
 
 visual.on("pointerup", pointerUpHandler);
 visual.on("pointerupoutside", pointerUpHandler);
 
 visual.on("globalpointermove", (e) => {
-  if (logo && logo.isDragging()) logo.moveBy(e.clientX - lastX, e.clientY - lastY);
+  if (logo && logo.isDragging())
+    logo.moveBy(e.clientX - lastX, e.clientY - lastY);
 
   lastX = e.clientX;
   lastY = e.clientY;
 });
 
 const params = {
-  background: '#161616',
-  tint: '#ff0',
+  background: "#161616",
+  tint: "#ff0",
   stepSize: 2,
 };
 
@@ -63,11 +64,11 @@ function setupUI() {
   controlsPane
     .addBinding(params, "stepSize", {
       label: "Step Size",
-      min: .1,
+      min: 0.1,
       max: 10,
     })
     .on("change", (e) => {
-      logo.setStepSize(e.value)
+      if (logo) logo.setStepSize(e.value);
     });
 }
 

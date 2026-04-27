@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
+    "github-build": "tsc && vite build --outDir docs --base ./",
     "preview": "vite preview"
   },
   "devDependencies": {
