@@ -5,6 +5,12 @@ import { Logo } from "./Logo";
 import type { Updatable } from "./interfaces";
 import { Pane } from "tweakpane";
 
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "visible") {
+    navigator.wakeLock.request("screen");
+  }
+});
+
 const updatables: Updatable[] = [];
 const app = new Application();
 
@@ -17,7 +23,7 @@ let logo: Logo | null = null;
 let offsetX = 0;
 let offsetY = 0;
 
-visual.on("pointerdown", e => {
+visual.on("pointerdown", (e) => {
   offsetX = e.clientX - visual.x;
   offsetY = e.clientY - visual.y;
 
